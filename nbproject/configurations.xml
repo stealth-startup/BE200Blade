@@ -6,8 +6,6 @@
                    projectFiles="true">
       <itemPath>MCU.h</itemPath>
       <itemPath>include.h</itemPath>
-      <itemPath>main.h</itemPath>
-      <itemPath>be200.h</itemPath>
     </logicalFolder>
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
