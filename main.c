@@ -1,8 +1,7 @@
-#include "include.h"
 #include <string.h>
 #include <stdio.h>
-
 #include <htc.h>
+#include "include.h"
 
 //#pragma config CONFIG1H = 0x25
 __CONFIG(1, FOSC_ECHPIO6 & PLLCFG_OFF & PRICLKEN_ON & FCMEN_OFF & IESO_OFF);
@@ -28,82 +27,23 @@ __CONFIG(10, EBTR0_OFF & EBTR1_OFF & EBTR2_OFF & EBTR3_OFF);
 __CONFIG(11, EBTRB_OFF);
 
 unsigned char test_vector[] = {0x02, 0x00, 0x00, 0x00, 0x73, 0xba, 0x60, 0x0f, 0xbb, 0x40, 0x71, 0xa6, 0xd8, 0x72, 0x12, 0x5e, 0x92, 0x7b, 0xfe, 0x09, 0xb8, 0xfe, 0x39, 0x67, 0xee, 0xe1, 0x37, 0x41, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x6a, 0x33, 0x33, 0xdd, 0x8f, 0x66, 0xfc, 0xc4, 0xb2, 0x09, 0x0a, 0x93, 0xe9, 0x17, 0x83, 0xcd, 0xc3, 0xb7, 0xc5, 0xce, 0x87, 0xf7, 0x48, 0x96, 0xe4, 0x2e, 0xe0, 0xbb, 0xde, 0xed, 0x44, 0x95, 0x99, 0x8b, 0x90, 0x52, 0xfb, 0x0b, 0x07, 0x19, 0x00, 0x00, 0x03, 0xde};
+u8 CHIP_CLOCK = 29;
 
 extern void sha256_init(void);
 extern void sha256_write(unsigned char);
 extern unsigned char* sha256_result(void);
-void OpenASIC(u8);
-void CloseASIC();
+
 void Menu();
 void SHA256_Test();
 void CS_Test();
 
-
-void OpenASIC(u8 n) {
-    static u8 cs_table[32][10] = {
-        {0, 0, 0, 0, 0, 0, 1, 0, 0, 0},
-        {0, 0, 1, 0, 0, 0, 1, 0, 0, 1},
-        {0, 1, 0, 0, 0, 0, 1, 0, 1, 0},
-        {0, 1, 1, 0, 0, 0, 1, 0, 1, 1},
-        {0, 0, 0, 0, 0, 0, 1, 1, 0, 0},
-        {0, 0, 1, 0, 0, 0, 1, 1, 0, 1},
-        {0, 1, 0, 0, 0, 0, 1, 1, 1, 0},
-        {0, 1, 1, 0, 0, 0, 1, 1, 1, 1},
-        {0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
-        {0, 0, 1, 0, 0, 1, 0, 0, 0, 1},
-        {0, 1, 0, 0, 0, 1, 0, 0, 1, 0},
-        {0, 1, 1, 0, 0, 1, 0, 0, 1, 1},
-        {0, 0, 0, 0, 0, 1, 0, 1, 0, 0},
-        {0, 0, 1, 0, 0, 1, 0, 1, 0, 1},
-        {0, 1, 0, 0, 0, 1, 0, 1, 1, 0},
-        {0, 1, 1, 0, 0, 1, 0, 1, 1, 1},
-        {1, 0, 0, 0, 1, 0, 0, 0, 0, 0},
-        {1, 0, 1, 0, 1, 0, 0, 0, 0, 1},
-        {1, 1, 0, 0, 1, 0, 0, 0, 1, 0},
-        {1, 1, 1, 0, 1, 0, 0, 0, 1, 1},
-        {1, 0, 0, 0, 1, 0, 0, 1, 0, 0},
-        {1, 0, 1, 0, 1, 0, 0, 1, 0, 1},
-        {1, 1, 0, 0, 1, 0, 0, 1, 1, 0},
-        {1, 1, 1, 0, 1, 0, 0, 1, 1, 1},
-        {1, 0, 0, 1, 0, 0, 0, 0, 0, 0},
-        {1, 0, 1, 1, 0, 0, 0, 0, 0, 1},
-        {1, 1, 0, 1, 0, 0, 0, 0, 1, 0},
-        {1, 1, 1, 1, 0, 0, 0, 0, 1, 1},
-        {1, 0, 0, 1, 0, 0, 0, 1, 0, 0},
-        {1, 0, 1, 1, 0, 0, 0, 1, 0, 1},
-        {1, 1, 0, 1, 0, 0, 0, 1, 1, 0},
-        {1, 1, 1, 1, 0, 0, 0, 1, 1, 1}
-    };
-    u8 *csN;
-    csN = cs_table[n-1];
-    MCU_SPI_SI_SEL2 = csN[0];
-    MCU_SPI_SI_SEL1 = csN[1];
-    MCU_SPI_SI_SEL0 = csN[2];
-
-    BE_CS_S6 = csN[3];
-    BE_CS_S5 = csN[4];
-    BE_CS_S4 = csN[5];
-
-    BE_CS_S3 = csN[6];
-    BE_CS_S2 = csN[7];
-    BE_CS_S1 = csN[8];
-    BE_CS_S0 = csN[9];
-}
-
-void CloseASIC() {
-    BE_CS_S6 = 0;
-    BE_CS_S5 = 0;
-    BE_CS_S4 = 0;
-}
-
-void Menu(){
-    
+void Menu(){    
     UARTGotoNewLine();
     UARTWriteLine("Welcome");
     UARTWriteLine("h:Show Menu");
     UARTWriteLine("s:SHA256 Benchmark");
     UARTWriteLine("c:Chip Select Test(c01,c02,...c32)");
-    
+    UARTWriteLine("C:CS from 1-32");    
 }
 
 void SHA256_Test() {
@@ -154,10 +94,18 @@ void CS_Test() {
     n=(a-'0')*10+(b-'0');
     UARTWriteLine("Chip Select:");
     UARTWriteInt(n,2);
-
-  
-    OpenASIC(n);
     CloseASIC();
+    OpenASIC(n);
+   
+}
+
+void CS_All_Test() {
+    u8 n;
+    for (n = 0; n < 32; n++) {
+        OpenASIC(n + 1);
+        CloseASIC();
+    }
+    UARTWriteLine("CS Done");
 }
 
 void main(void) {
@@ -165,6 +113,21 @@ void main(void) {
     char c;
     MCU_INIT();
     LED=0;
+
+    // Test all the 3-to-8 decoders
+    BE_CS_S6 = 1;
+    BE_CS_S5 = 1;
+    BE_CS_S4 = 1;
+    BE_CS_S3 = 1;
+    BE_CS_S2 = 1;
+    BE_CS_S1 = 1;
+    BE_CS_S0 = 1;
+
+    HARD0 = 1;
+    HARD1 = 1;
+    BS = 1;
+    
+
     while (1) {
         if(UARTDataAvailable()>0) c = UARTReadData();
         switch (c) {
@@ -177,6 +140,10 @@ void main(void) {
                 break;
             case 'c':
                 CS_Test();
+                Menu();
+                break;
+            case 'C':
+                CS_All_Test();
                 Menu();
                 break;
         }

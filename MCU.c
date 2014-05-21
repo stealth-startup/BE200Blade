@@ -1,20 +1,6 @@
 
 #include "include.h"
-
-
-
-
-// PIC18F87K22 Configuration Bit Settings
-
-// 'C' source line config statements
-
 #include <htc.h>
-
-#define FIFO_SIZE 64
-
-char pbBuffer[FIFO_SIZE];
-char *pbPut;
-char *pbGet;
 
 unsigned char counter = 0; //Overflow counter
 unsigned char seconds = 0;
@@ -29,12 +15,17 @@ u32 GetTime() {
 }
 
 void MCU_delay(void) {
-    unsigned int i = 60000;
+    unsigned int i = 6000;
     while (i--);
 }
 
 void MCU_INIT(void) {
-    //TRISC6 = 0;
+    ANSELE = 0x00;
+    ANSELD = 0x00;
+    ANSELC = 0x00;
+    ANSELB = 0x00;
+    ANSELA = 0x00;
+
     TRISC5 = 0; //
     TRISC4 = 1;
     TRISD3 = 1;
@@ -46,11 +37,11 @@ void MCU_INIT(void) {
     TRISC1 = 0;
 
     TRISC0 = 0;
-    TRISA7 = 1;
     TRISE2 = 0;
     TRISE1 = 0;
     TRISE0 = 0;
     TRISA4 = 0;
+    TRISA5 = 0;
 
     TRISB4 = 0;
     TRISB5 = 0;
@@ -61,6 +52,8 @@ void MCU_INIT(void) {
 
     
     TRISD4 = 0;
+    TRISD6 = 0;
+    TRISD7 = 1;
 
     PSA = 0;
     T0SE = 0;
@@ -80,6 +73,10 @@ void MCU_INIT(void) {
 
     UART_INIT();
     SPI_Init();
+
+    HARD0 = 1;
+    HARD1 = 0;
+    BS = 0;
 
 }
 
