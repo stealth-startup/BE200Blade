@@ -45,17 +45,17 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
 # Source Files Quoted if spaced
-SOURCEFILES_QUOTED_IF_SPACED=MCU.c main.c sha256.c be200.c
+SOURCEFILES_QUOTED_IF_SPACED=MCU.c main.c sha256.c be200.c testcase.c
 
 # Object Files Quoted if spaced
-OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/MCU.p1 ${OBJECTDIR}/main.p1 ${OBJECTDIR}/sha256.p1 ${OBJECTDIR}/be200.p1
-POSSIBLE_DEPFILES=${OBJECTDIR}/MCU.p1.d ${OBJECTDIR}/main.p1.d ${OBJECTDIR}/sha256.p1.d ${OBJECTDIR}/be200.p1.d
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/MCU.p1 ${OBJECTDIR}/main.p1 ${OBJECTDIR}/sha256.p1 ${OBJECTDIR}/be200.p1 ${OBJECTDIR}/testcase.p1
+POSSIBLE_DEPFILES=${OBJECTDIR}/MCU.p1.d ${OBJECTDIR}/main.p1.d ${OBJECTDIR}/sha256.p1.d ${OBJECTDIR}/be200.p1.d ${OBJECTDIR}/testcase.p1.d
 
 # Object Files
-OBJECTFILES=${OBJECTDIR}/MCU.p1 ${OBJECTDIR}/main.p1 ${OBJECTDIR}/sha256.p1 ${OBJECTDIR}/be200.p1
+OBJECTFILES=${OBJECTDIR}/MCU.p1 ${OBJECTDIR}/main.p1 ${OBJECTDIR}/sha256.p1 ${OBJECTDIR}/be200.p1 ${OBJECTDIR}/testcase.p1
 
 # Source Files
-SOURCEFILES=MCU.c main.c sha256.c be200.c
+SOURCEFILES=MCU.c main.c sha256.c be200.c testcase.c
 
 
 CFLAGS=
@@ -116,6 +116,14 @@ ${OBJECTDIR}/be200.p1: be200.c  nbproject/Makefile-${CND_CONF}.mk
 	@cat ${OBJECTDIR}/be200.dep >> ${OBJECTDIR}/be200.p1.d
 	@${FIXDEPS} "${OBJECTDIR}/be200.p1.d" $(SILENT) -ht  -rsi ${MP_CC_DIR}../ 
 	
+${OBJECTDIR}/testcase.p1: testcase.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR} 
+	${MP_CC} --pass1 testcase.c $(MP_EXTRA_CC_PRE) -q --chip=$(MP_PROCESSOR_OPTION) -P  --outdir="${OBJECTDIR}" -N31 --warn=0 --runtime=default,+clear,+init,-keep,-download,+stackwarn,-config,+clib,-plib --opt=default,+asm,-asmfile,-speed,+space,9 -D__DEBUG --debugger=realice --cp=16 -Blarge --double=24  --mode=lite -g --asmlist "--errformat=%%f:%%l: error: %%s" "--msgformat=%%f:%%l: advisory: %%s" "--warnformat=%%f:%%l warning: %%s"  
+	@${MP_CC} --scandep  testcase.c $(MP_EXTRA_CC_PRE) -q --chip=$(MP_PROCESSOR_OPTION) -P  --outdir="${OBJECTDIR}" -N31 --warn=0 --runtime=default,+clear,+init,-keep,-download,+stackwarn,-config,+clib,-plib --opt=default,+asm,-asmfile,-speed,+space,9 -D__DEBUG --debugger=realice --cp=16 -Blarge --double=24  --mode=lite -g --asmlist "--errformat=%%f:%%l: error: %%s" "--msgformat=%%f:%%l: advisory: %%s" "--warnformat=%%f:%%l warning: %%s"  
+	@echo ${OBJECTDIR}/testcase.p1: > ${OBJECTDIR}/testcase.p1.d
+	@cat ${OBJECTDIR}/testcase.dep >> ${OBJECTDIR}/testcase.p1.d
+	@${FIXDEPS} "${OBJECTDIR}/testcase.p1.d" $(SILENT) -ht  -rsi ${MP_CC_DIR}../ 
+	
 else
 ${OBJECTDIR}/MCU.p1: MCU.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR} 
@@ -148,6 +156,14 @@ ${OBJECTDIR}/be200.p1: be200.c  nbproject/Makefile-${CND_CONF}.mk
 	@echo ${OBJECTDIR}/be200.p1: > ${OBJECTDIR}/be200.p1.d
 	@cat ${OBJECTDIR}/be200.dep >> ${OBJECTDIR}/be200.p1.d
 	@${FIXDEPS} "${OBJECTDIR}/be200.p1.d" $(SILENT) -ht  -rsi ${MP_CC_DIR}../ 
+	
+${OBJECTDIR}/testcase.p1: testcase.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR} 
+	${MP_CC} --pass1 testcase.c $(MP_EXTRA_CC_PRE) -q --chip=$(MP_PROCESSOR_OPTION) -P  --outdir="${OBJECTDIR}" -N31 --warn=0 --runtime=default,+clear,+init,-keep,-download,+stackwarn,-config,+clib,-plib --opt=default,+asm,-asmfile,-speed,+space,9 --cp=16 -Blarge --double=24  --mode=lite -g --asmlist "--errformat=%%f:%%l: error: %%s" "--msgformat=%%f:%%l: advisory: %%s" "--warnformat=%%f:%%l warning: %%s"  
+	@${MP_CC} --scandep  testcase.c $(MP_EXTRA_CC_PRE) -q --chip=$(MP_PROCESSOR_OPTION) -P  --outdir="${OBJECTDIR}" -N31 --warn=0 --runtime=default,+clear,+init,-keep,-download,+stackwarn,-config,+clib,-plib --opt=default,+asm,-asmfile,-speed,+space,9 --cp=16 -Blarge --double=24  --mode=lite -g --asmlist "--errformat=%%f:%%l: error: %%s" "--msgformat=%%f:%%l: advisory: %%s" "--warnformat=%%f:%%l warning: %%s"  
+	@echo ${OBJECTDIR}/testcase.p1: > ${OBJECTDIR}/testcase.p1.d
+	@cat ${OBJECTDIR}/testcase.dep >> ${OBJECTDIR}/testcase.p1.d
+	@${FIXDEPS} "${OBJECTDIR}/testcase.p1.d" $(SILENT) -ht  -rsi ${MP_CC_DIR}../ 
 	
 endif
 

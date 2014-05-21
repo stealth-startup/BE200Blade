@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <htc.h>
 #include "include.h"
+#include "testcase.c"
 
 //#pragma config CONFIG1H = 0x25
 __CONFIG(1, FOSC_ECHPIO6 & PLLCFG_OFF & PRICLKEN_ON & FCMEN_OFF & IESO_OFF);

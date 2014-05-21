@@ -15,6 +15,7 @@
       <itemPath>main.c</itemPath>
       <itemPath>sha256.c</itemPath>
       <itemPath>be200.c</itemPath>
+      <itemPath>testcase.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
