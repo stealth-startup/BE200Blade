@@ -48,6 +48,8 @@ void UARTWriteChar(char ch);
 void UARTWriteString(const char *str);
 void UARTWriteLine(const char *str);
 void UARTWriteInt(u16 val, u8 field_length);
+void UARTWriteOneHex(u8 val);
+void UARTWriteHex(u8 val[4]);
 void UARTGotoNewLine();
 
 void UARTHandleRxInt();

@@ -91,9 +91,36 @@ void ResetASIC(void) {
     SetPll(CHIP_CLOCK-1);
 }
 
+void SendWork(u8 work[44]) {
+    u8 i;
+    for (i = 0; i < 44; i++) {
+        SPI_Write(CMD_WRITE_REG(i));
+        SPI_Write(work[i]);
+    }
+    SPI_Write(CMD_WRITE_REG(REG_START));
+    SPI_Write(0);
+}
+
+void ReadWork(u8 work[44]) {
+    u8 i;
+    for (i = 0; i < 44; i++) {
+        SPI_Write(CMD_READ_REG(i));
+        work[i] = SPI_Read();
+    }
+}
+
 u8 GetASIC(void) {
     SPI_Write(CMD_READ_REG(REG_STATUS));
     return (SPI_Read());
+}
+
+
+void IncNonce(u8 nonce[4]){
+     u8 i;
+     for(i=3;i<=0;i++){
+         nonce[i]++;
+         if(nonce[i]) break;
+     }
 }
 
 u8 GetNonce(u8 *nonce, u8 clear) {
@@ -116,10 +143,12 @@ u8 GetNonce(u8 *nonce, u8 clear) {
         else
             addr = 58;
 
-	SPI_Write(CMD_READ_REG(addr+3)); nonce[3] = SPI_Read();
-	SPI_Write(CMD_READ_REG(addr+2)); nonce[2] = SPI_Read();
-	SPI_Write(CMD_READ_REG(addr+1)); nonce[1] = SPI_Read();
-	SPI_Write(CMD_READ_REG(addr  )); nonce[0] = SPI_Read();
+	SPI_Write(CMD_READ_REG(addr+3)); nonce[0] = SPI_Read();
+	SPI_Write(CMD_READ_REG(addr+2)); nonce[1] = SPI_Read();
+	SPI_Write(CMD_READ_REG(addr+1)); nonce[2] = SPI_Read();
+	SPI_Write(CMD_READ_REG(addr  )); nonce[3] = SPI_Read();
+
+        IncNonce(nonce);
 
 	if (clear) {
 		SPI_Write(CMD_READ_REG(REG_CLEAR));

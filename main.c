@@ -28,7 +28,7 @@ __CONFIG(10, EBTR0_OFF & EBTR1_OFF & EBTR2_OFF & EBTR3_OFF);
 __CONFIG(11, EBTRB_OFF);
 
 unsigned char test_vector[] = {0x02, 0x00, 0x00, 0x00, 0x73, 0xba, 0x60, 0x0f, 0xbb, 0x40, 0x71, 0xa6, 0xd8, 0x72, 0x12, 0x5e, 0x92, 0x7b, 0xfe, 0x09, 0xb8, 0xfe, 0x39, 0x67, 0xee, 0xe1, 0x37, 0x41, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x6a, 0x33, 0x33, 0xdd, 0x8f, 0x66, 0xfc, 0xc4, 0xb2, 0x09, 0x0a, 0x93, 0xe9, 0x17, 0x83, 0xcd, 0xc3, 0xb7, 0xc5, 0xce, 0x87, 0xf7, 0x48, 0x96, 0xe4, 0x2e, 0xe0, 0xbb, 0xde, 0xed, 0x44, 0x95, 0x99, 0x8b, 0x90, 0x52, 0xfb, 0x0b, 0x07, 0x19, 0x00, 0x00, 0x03, 0xde};
-u8 CHIP_CLOCK = 29;
+u8 CHIP_CLOCK =  29;
 
 extern void sha256_init(void);
 extern void sha256_write(unsigned char);
@@ -44,7 +44,8 @@ void Menu(){
     UARTWriteLine("h:Show Menu");
     UARTWriteLine("s:SHA256 Benchmark");
     UARTWriteLine("c:Chip Select Test(c01,c02,...c32)");
-    UARTWriteLine("C:CS from 1-32");    
+    UARTWriteLine("C:CS from 1-32");
+    UARTWriteLine("t:Test one ASIC(t01,t02,...t32)");
 }
 
 void SHA256_Test() {
@@ -109,25 +110,47 @@ void CS_All_Test() {
     UARTWriteLine("CS Done");
 }
 
+void Test() {
+    u8 nonce[4];
+    u8 work[44];
+    u8 i;
+    u8 stat;
+    CloseASIC();
+    OpenASIC(8);
+
+    UARTWriteLine("Set Clock To ");
+    UARTWriteInt(10 * (CHIP_CLOCK + 1), 3);
+    SetPll(CHIP_CLOCK);
+    MCU_delay();   
+    
+    UARTWriteLine("Check Status: ");
+    stat = GetASIC();
+    UARTWriteOneHex(stat);
+
+    UARTWriteLine("Sending  work: ");
+    for (i = 0; i < 44; i++) {
+        UARTWriteOneHex(cases[0].work[i]);
+    }
+    SendWork(cases[0].work);
+
+    UARTWriteLine("Checking work: ");
+    ReadWork(work);
+    for (i = 0; i < 44; i++) {
+        UARTWriteOneHex(work[i]);
+    }
+    
+    GetNonce(&nonce, TRUE);
+    UARTWriteLine("Get Nonce:");
+    UARTWriteHex(nonce);
+    UARTWriteLine(" Expected:");
+    UARTWriteHex(cases[0].nonce);
+}
+
 void main(void) {
     u8 i = 0;
     char c;
     MCU_INIT();
     LED=0;
-
-    // Test all the 3-to-8 decoders
-    BE_CS_S6 = 1;
-    BE_CS_S5 = 1;
-    BE_CS_S4 = 1;
-    BE_CS_S3 = 1;
-    BE_CS_S2 = 1;
-    BE_CS_S1 = 1;
-    BE_CS_S0 = 1;
-
-    HARD0 = 1;
-    HARD1 = 1;
-    BS = 1;
-    
 
     while (1) {
         if(UARTDataAvailable()>0) c = UARTReadData();
@@ -145,6 +168,10 @@ void main(void) {
                 break;
             case 'C':
                 CS_All_Test();
+                Menu();
+                break;
+            case 't':
+                Test();
                 Menu();
                 break;
         }

@@ -30,6 +30,8 @@ void Clr_BS(void);
 void OpenASIC(u8 n);
 void CloseASIC();
 void ResetASIC(void);
+void SendWork(u8 work[44]);
+void ReadWork(u8 work[44]);
 u8 GetASIC(void);
 u8 GetNonce(u8 *nonce, u8 clear);
 

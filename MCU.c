@@ -15,7 +15,7 @@ u32 GetTime() {
 }
 
 void MCU_delay(void) {
-    unsigned int i = 6000;
+    unsigned int i = 60000;
     while (i--);
 }
 
@@ -46,9 +46,7 @@ void MCU_INIT(void) {
     TRISB4 = 0;
     TRISB5 = 0;
     TRISA0 = 0;
-    TRISA1 = 0;
-    TRISA2 = 0;
-    TRISA3 = 0;
+
 
     
     TRISD4 = 0;
@@ -74,9 +72,24 @@ void MCU_INIT(void) {
     UART_INIT();
     SPI_Init();
 
+    // USE SWITCH
     HARD0 = 1;
-    HARD1 = 0;
-    BS = 0;
+    HARD1 = 1;
+    BS = 1;
+    RST = 1;
+
+    MCU_SPI_SI_SEL2 = 0;
+    MCU_SPI_SI_SEL1 = 0;
+    MCU_SPI_SI_SEL0 = 0;
+
+    BE_CS_S6 = 0;
+    BE_CS_S5 = 0;
+    BE_CS_S4 = 0;
+    BE_CS_S3 = 0;
+
+    BE_CS_S2 = 0;
+    BE_CS_S1 = 0;
+    BE_CS_S0 = 0;
 
 }
 
@@ -236,6 +249,23 @@ void UARTWriteInt(u16 val, u8 field_length) {
     }
 }
 
+void UARTWriteHex(u8 val[4]) {
+    u8 temp;
+    u8 i;    
+    for(i=0;i<4;i++) {
+       temp = val[i];
+       UARTWriteOneHex(temp);
+    }
+}
+
+void UARTWriteOneHex(u8 val) {
+    u8 str[3] = {0, 0, 0};
+    u8 alphabet[16] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+    str[0] = alphabet[val / 16];
+    str[1] = alphabet[val % 16];
+    UARTWriteString(str);
+}
+
 void UARTGotoNewLine() {
     UARTWriteChar('\r'); //CR
     UARTWriteChar('\n'); //LF
@@ -254,20 +284,34 @@ void UARTFlushBuffer() {
     }
 }
 
-void SPI_Write(char data) {
-    SSPBUF = data;
-    while (!SSP1STATbits.BF);
+void SPI_Write(u8 data) {
+    SSP1BUF = data;
+    while (PIR1bits.SSP1IF == 0);
+    PIR1bits.SSP1IF = 0;
 }
 
 u8 SPI_Read() {
-    SSPBUF = 0x00;
-    while (!SSP1STATbits.BF);
-    return (SSPBUF);
+    SSP1BUF = 0x00;
+    while (PIR1bits.SSP1IF == 0);
+    PIR1bits.SSP1IF = 0;
+    return (SSP1BUF);
 }
 
 void SPI_Init() {
-    SSPSTAT = 0x40; // Set SMP=0 and CKE=1. Notes: The lower 6 bit is read only
-    SSPCON1 = 0x20;
+    // SI_SEL
+    TRISA1 = 0;
+    TRISA2 = 0;
+    TRISA3 = 0;
+
+    TRISC3 = 0; // SCK
+    TRISC4 = 1; // SDI
+    TRISC5 = 0; // SDO
+
+    SSP1STAT = 0B00000000;  // SMP|CKE|DA|P|S|RW|UA|BF
+
+    // SPI MASTER
+    SSP1CON1 = 0B00110001; //WCOL|SSPOV|SSPEN|CKP|SSPM3|SSPM2|SSPM1|SSPM0
+    SSP1CON2 = 0B00000000; //GCEN|ACKSTAT|ACKDT|ACKEN|RCEN|PEN|RSEN|SEN
 }
 
 u8 LED_Stat = 0;

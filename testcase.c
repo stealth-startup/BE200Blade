@@ -1,8 +1,6 @@
-#include "include.h"
-
 typedef struct _test_case {
-    u8 work[44];
-    u8 nonce[4];
+    unsigned char work[44];
+    unsigned char nonce[4];
 } Test_Case;
 
 Test_Case cases[32] = {
