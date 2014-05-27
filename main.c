@@ -46,6 +46,7 @@ void Menu(){
     UARTWriteLine("c:Chip Select Test(c01,c02,...c32)");
     UARTWriteLine("C:CS from 1-32");
     UARTWriteLine("t:Test one ASIC(t01,t02,...t32)");
+    UARTWriteLine("T:Test all 32 ASICs");
 }
 
 void SHA256_Test() {
