@@ -53,29 +53,25 @@ void OpenASIC(u8 n) {
     MCU_SPI_SI_SEL1 = csN[1];
     MCU_SPI_SI_SEL0 = csN[2];
 
-    MCU_delay();
-
     BE_CS_S6 = csN[3];
     BE_CS_S5 = csN[4];
     BE_CS_S4 = csN[5];
     BE_CS_S3 = csN[6];
 
-    UARTWriteLine("3-8 Enable:");
-    UARTWriteInt(csN[3],2);
-    UARTWriteInt(csN[4],2);
-    UARTWriteInt(csN[5],2);
-    UARTWriteInt(csN[6],2);
-
-    MCU_delay();
+//    UARTWriteLine("3-8 Enable:");
+//    UARTWriteInt(csN[3],2);
+//    UARTWriteInt(csN[4],2);
+//    UARTWriteInt(csN[5],2);
+//    UARTWriteInt(csN[6],2);
 
     BE_CS_S2 = csN[7];
     BE_CS_S1 = csN[8];
     BE_CS_S0 = csN[9];
 
-    UARTWriteLine("3-8  Input:");
-    UARTWriteInt(csN[7],2);
-    UARTWriteInt(csN[8],2);
-    UARTWriteInt(csN[9],2);
+//    UARTWriteLine("3-8  Input:");
+//    UARTWriteInt(csN[7],2);
+//    UARTWriteInt(csN[8],2);
+//    UARTWriteInt(csN[9],2);
 
 }
 
@@ -114,46 +110,50 @@ u8 GetASIC(void) {
     return (SPI_Read());
 }
 
-
-void IncNonce(u8 nonce[4]){
-     u8 i;
-     for(i=3;i<=0;i++){
-         nonce[i]++;
-         if(nonce[i]) break;
-     }
-}
-
 u8 GetNonce(u8 *nonce, u8 clear) {
-	u8 mask, addr;
+    u8 status, addr;
+    u8 i;
+    status = GetASIC();
+    UARTWriteLine("Check Status: ");
+    status = GetASIC();
+    UARTWriteOneHex(status);
 
-	mask = GetASIC();
-	if(!(mask & STAT_R_READY))
-            return FALSE ;
-	mask >>= 2;
-        mask &= 0x0f;
-	
-	if(!mask)
-            return FALSE ;
-	if (mask & 0x01)
-            addr = 46;
-	else if (mask & 0x02)	
-            addr = 50;
-        else if (mask & 0x04)
-            addr = 54;
-        else
-            addr = 58;
+    if (!(status & STAT_R_READY))
+        return FALSE;
+    status >>= 2;
+    status &= 0x0f;
 
-	SPI_Write(CMD_READ_REG(addr+3)); nonce[0] = SPI_Read();
-	SPI_Write(CMD_READ_REG(addr+2)); nonce[1] = SPI_Read();
-	SPI_Write(CMD_READ_REG(addr+1)); nonce[2] = SPI_Read();
-	SPI_Write(CMD_READ_REG(addr  )); nonce[3] = SPI_Read();
+    if (!status)
+        return FALSE;
+    if (status & 0x01)
+        addr = 46;
+    else if (status & 0x02)
+        addr = 50;
+    else if (status & 0x04)
+        addr = 54;
+    else
+        addr = 58;
 
-        IncNonce(nonce);
+    SPI_Write(CMD_READ_REG(addr + 3));
+    nonce[0] = SPI_Read();
+    SPI_Write(CMD_READ_REG(addr + 2));
+    nonce[1] = SPI_Read();
+    SPI_Write(CMD_READ_REG(addr + 1));
+    nonce[2] = SPI_Read();
+    SPI_Write(CMD_READ_REG(addr));
+    nonce[3] = SPI_Read();
+    
+    // Increase nonce by 1
+    for(i=3;i>=0;i--){
+        nonce[i]=nonce[i]+1;
+        if(nonce[i])
+            break;
+    }
 
-	if (clear) {
-		SPI_Write(CMD_READ_REG(REG_CLEAR));
-                SPI_Read();
-        }
-	return TRUE;
+    if (clear) {
+        SPI_Write(CMD_READ_REG(REG_CLEAR));
+        SPI_Read();
+    }
+    return TRUE;
 }
 

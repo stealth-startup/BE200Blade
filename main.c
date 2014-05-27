@@ -28,7 +28,7 @@ __CONFIG(10, EBTR0_OFF & EBTR1_OFF & EBTR2_OFF & EBTR3_OFF);
 __CONFIG(11, EBTRB_OFF);
 
 unsigned char test_vector[] = {0x02, 0x00, 0x00, 0x00, 0x73, 0xba, 0x60, 0x0f, 0xbb, 0x40, 0x71, 0xa6, 0xd8, 0x72, 0x12, 0x5e, 0x92, 0x7b, 0xfe, 0x09, 0xb8, 0xfe, 0x39, 0x67, 0xee, 0xe1, 0x37, 0x41, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x6a, 0x33, 0x33, 0xdd, 0x8f, 0x66, 0xfc, 0xc4, 0xb2, 0x09, 0x0a, 0x93, 0xe9, 0x17, 0x83, 0xcd, 0xc3, 0xb7, 0xc5, 0xce, 0x87, 0xf7, 0x48, 0x96, 0xe4, 0x2e, 0xe0, 0xbb, 0xde, 0xed, 0x44, 0x95, 0x99, 0x8b, 0x90, 0x52, 0xfb, 0x0b, 0x07, 0x19, 0x00, 0x00, 0x03, 0xde};
-u8 CHIP_CLOCK =  29;
+u8 CHIP_CLOCK = 29;
 
 extern void sha256_init(void);
 extern void sha256_write(unsigned char);
@@ -109,19 +109,22 @@ void CS_All_Test() {
     }
     UARTWriteLine("CS Done");
 }
-
-void Test() {
-    u8 nonce[4];
+void TestASIC(u8 n) {
+    u8 nonce[4] = {0, 0, 0, 0};
     u8 work[44];
     u8 i;
     u8 stat;
+    u8 case_n = 1;
+    u32 tick;
+    UARTWriteLine("Test Chip:");
+    UARTWriteInt(n,2);
     CloseASIC();
-    OpenASIC(8);
+    OpenASIC(n);
 
     UARTWriteLine("Set Clock To ");
     UARTWriteInt(10 * (CHIP_CLOCK + 1), 3);
     SetPll(CHIP_CLOCK);
-    MCU_delay();   
+
     
     UARTWriteLine("Check Status: ");
     stat = GetASIC();
@@ -129,21 +132,41 @@ void Test() {
 
     UARTWriteLine("Sending  work: ");
     for (i = 0; i < 44; i++) {
-        UARTWriteOneHex(cases[0].work[i]);
+        UARTWriteOneHex(cases[case_n].work[i]);
     }
-    SendWork(cases[0].work);
-
+    SendWork(cases[case_n].work);
     UARTWriteLine("Checking work: ");
     ReadWork(work);
     for (i = 0; i < 44; i++) {
         UARTWriteOneHex(work[i]);
     }
-    
+    tick=GetTime();
+    while(GetTime()-tick<700);
     GetNonce(&nonce, TRUE);
     UARTWriteLine("Get Nonce:");
     UARTWriteHex(nonce);
     UARTWriteLine(" Expected:");
-    UARTWriteHex(cases[0].nonce);
+    UARTWriteHex(cases[case_n].nonce);
+    UARTGotoNewLine();
+
+}
+void TestOne() {
+    char a, b;
+    u8 n;
+   
+    while(UARTDataAvailable()<2);
+    a = UARTReadData();
+    b = UARTReadData();
+    n=(a-'0')*10+(b-'0');
+
+    TestASIC(n);
+}
+
+void TestAll() {
+   u8 i;
+   for(i=0;i<32;i++) {
+       TestASIC(i+1);
+   }
 }
 
 void main(void) {
@@ -171,7 +194,11 @@ void main(void) {
                 Menu();
                 break;
             case 't':
-                Test();
+                TestOne();
+                Menu();
+                break;
+            case 'T':
+                TestAll();
                 Menu();
                 break;
         }

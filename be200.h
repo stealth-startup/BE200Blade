@@ -19,8 +19,6 @@
 
 #define STAT_W_ALLOW           0x01
 #define STAT_R_READY           0x02
-#define STAT_TICKET_MASK       0x3c
-
 
 extern u8 CHIP_CLOCK;
 
